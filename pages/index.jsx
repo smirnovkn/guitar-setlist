@@ -1,3 +1,5 @@
+Bash
+cat /home/user/guitar-setlist/pages/index.jsx
 import Head from 'next/head';
 import { useState, useCallback } from 'react';
 
@@ -202,6 +204,7 @@ function NextCard({ track, onPick }) {
 export default function Home() {
   const [mood, setMood]         = useState(null);
   const [energy, setEnergy]     = useState(55);
+  const [wish, setWish]         = useState('');
   const [mainSong, setMainSong] = useState(null);
   const [spotify, setSpotify]   = useState(null);
   const [nextTracks, setNextTracks] = useState([]);
@@ -224,7 +227,7 @@ export default function Home() {
       const recRes = await fetch('/api/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mood: selectedMood, energy: nrg, history, prevSong }),
+        body: JSON.stringify({ mood: selectedMood, energy: nrg, history, prevSong, wish }),
       });
       const song = await recRes.json();
       if (song.error) throw new Error(song.error);
@@ -275,6 +278,7 @@ export default function Home() {
   }, [history]);
 
   const handleMood    = m => { setMood(m); recommend(m, energy); };
+  const handleWishKey = e => { if (e.key === 'Enter' && mood) recommend(mood, energy); };
   const handlePick    = t => {
     const picked = { title: t.name, artist: typeof t.artist === 'string' ? t.artist : t.artist?.name };
     recommend(mood, energy, mainSong);
@@ -349,6 +353,35 @@ export default function Home() {
                   onChange={e => setEnergy(Number(e.target.value))}
                   style={{ width: '100%', background: `linear-gradient(to right,${C.amber} ${energy}%,rgba(232,168,56,.18) ${energy}%)` }} />
               </div>
+
+              <div style={{ marginTop: 12 }}>
+                <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.dim, marginBottom: 10 }}>
+                  Пожелание — необязательно
+                </p>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="text"
+                    value={wish}
+                    onChange={e => setWish(e.target.value)}
+                    onKeyDown={handleWishKey}
+                    placeholder='например: "что-нибудь из Цоя" или "хочу Меладзе"'
+                    style={{
+                      width: '100%', background: 'rgba(232,168,56,.04)',
+                      border: '1px solid rgba(232,168,56,.18)', borderRadius: 10,
+                      padding: '12px 16px', color: C.text, fontFamily: 'inherit',
+                      fontSize: 15, outline: 'none',
+                    }}
+                    onFocus={e => e.target.style.borderColor = 'rgba(232,168,56,.45)'}
+                    onBlur={e => e.target.style.borderColor = 'rgba(232,168,56,.18)'}
+                  />
+                  {wish && (
+                    <button onClick={() => setWish('')} style={{
+                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', color: C.dim, cursor: 'pointer', fontSize: 16,
+                    }}>✕</button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 
@@ -375,7 +408,31 @@ export default function Home() {
             <div className="fade">
               <MainCard song={mainSong} spotify={spotify} />
 
-              <div style={{ display: 'flex', gap: 10, margin: '14px 0 22px' }}>
+              <div style={{ margin: '14px 0 10px', position: 'relative' }}>
+                <input
+                  type="text"
+                  value={wish}
+                  onChange={e => setWish(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleShuffle()}
+                  placeholder='уточни пожелание: "хочу Цоя" или "что-то потише"'
+                  style={{
+                    width: '100%', background: 'rgba(232,168,56,.04)',
+                    border: '1px solid rgba(232,168,56,.18)', borderRadius: 10,
+                    padding: '11px 36px 11px 14px', color: C.text, fontFamily: 'inherit',
+                    fontSize: 15, outline: 'none',
+                  }}
+                  onFocus={e => e.target.style.borderColor = 'rgba(232,168,56,.45)'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(232,168,56,.18)'}
+                />
+                {wish && (
+                  <button onClick={() => setWish('')} style={{
+                    position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                    background: 'none', border: 'none', color: C.dim, cursor: 'pointer', fontSize: 16,
+                  }}>✕</button>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: 10, margin: '0 0 22px' }}>
                 <button onClick={handleShuffle} style={{ flex: 1, background: 'rgba(232,168,56,.1)', border: '1px solid rgba(232,168,56,.28)', borderRadius: 10, padding: 13, color: C.amber, cursor: 'pointer', fontSize: 16, fontFamily: 'inherit' }}>
                   🔀 Другую
                 </button>
