@@ -42,7 +42,7 @@ async function getSpotifyPopularity(title, artist) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { mood, energy, history = [], prevSong } = req.body;
+  const { mood, energy, history = [], prevSong, wish } = req.body;
   if (!mood || energy == null) return res.status(400).json({ error: 'Missing mood or energy' });
 
   const moodLabels = {
@@ -69,11 +69,14 @@ export default async function handler(req, res) {
     const prevNote = prevSong
       ? `\n\nПредыдущая песня: "${prevSong.title}" — ${prevSong.artist}`
       : '';
+    const wishNote = wish?.trim()
+      ? `\n\nПожелание от гитариста: ${wish.trim()}`
+      : '';
 
     return `Ты — опытный гитарист на вечеринке. Подбери одну песню для исполнения.
 
 Настроение компании: ${moodLabels[mood.id] || mood.id}
-Уровень энергии: ${energy}/100 (0=тихо, 100=полный угар)${prevNote}${historyNote}${excludeNote}
+Уровень энергии: ${energy}/100 (0=тихо, 100=полный угар)${prevNote}${wishNote}${historyNote}${excludeNote}
 
 Верни ТОЛЬКО валидный JSON без markdown-блоков, точно в таком формате:
 {
@@ -101,7 +104,6 @@ export default async function handler(req, res) {
     const excluded = [];
     let song = await askClaude(buildPrompt());
 
-    // If Spotify keys are set, verify popularity; retry once if track is too obscure
     if (process.env.SPOTIFY_CLIENT_ID) {
       const popularity = await getSpotifyPopularity(song.title, song.artist);
       if (popularity !== null && popularity < 40) {
