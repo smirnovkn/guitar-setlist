@@ -1,18 +1,11 @@
-Bash
-cat /home/user/guitar-setlist/pages/index.jsx
 import Head from 'next/head';
 import { useState, useCallback } from 'react';
 
-// ── Link generators ──────────────────────────────────────────────────────────
 const ugUrl     = (t, a) => `https://www.ultimate-guitar.com/search.php?search_type=title&value=${encodeURIComponent(`${t} ${a}`)}`;
 const geniusUrl = (t, a) => `https://genius.com/search?q=${encodeURIComponent(`${t} ${a}`)}`;
 const chordsUrl = (t, a) => `https://mychords.net/search/?q=${encodeURIComponent(`${t} ${a}`)}`;
 
-// ── Design ───────────────────────────────────────────────────────────────────
-const C = {
-  amber: '#e8a838', text: '#f0e2c4',
-  muted: '#7a5a2a', dim: '#5a3a10',
-};
+const C = { amber: '#e8a838', text: '#f0e2c4', muted: '#7a5a2a', dim: '#5a3a10' };
 
 const MOODS = [
   { id: 'nostalgic',   label: 'Ностальгия',  emoji: '🌙', desc: 'Тёплые воспоминания', tag: 'nostalgic'  },
@@ -22,8 +15,6 @@ const MOODS = [
   { id: 'fun',         label: 'Хулиганим',   emoji: '🎉',  desc: 'Смех и веселье',     tag: 'party'      },
   { id: 'chill',       label: 'Расслабон',   emoji: '🌊',  desc: 'Тихо и спокойно',    tag: 'acoustic'   },
 ];
-
-// ── Small components ─────────────────────────────────────────────────────────
 
 function ExtLink({ href, accent, children }) {
   return (
@@ -70,12 +61,10 @@ function PreviewButton({ url }) {
   const [playing, setPlaying] = useState(false);
   const [audio] = useState(() => typeof Audio !== 'undefined' ? new Audio(url) : null);
   if (!url || !audio) return null;
-
   const toggle = () => {
     if (playing) { audio.pause(); audio.currentTime = 0; setPlaying(false); }
     else { audio.play(); audio.onended = () => setPlaying(false); setPlaying(true); }
   };
-
   return (
     <button onClick={toggle} style={{
       background: playing ? 'rgba(232,168,56,0.2)' : 'rgba(255,255,255,0.05)',
@@ -88,12 +77,9 @@ function PreviewButton({ url }) {
   );
 }
 
-// ── Main card ────────────────────────────────────────────────────────────────
-
 function MainCard({ song, spotify }) {
   const { title, artist, year, key: songKey, tempo, energy_dots, why } = song;
   const img = spotify?.track?.image;
-
   return (
     <div style={{ background: 'rgba(232,168,56,0.05)', border: '1px solid rgba(232,168,56,0.28)', borderRadius: 20, padding: '24px 26px' }}>
       <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
@@ -122,14 +108,11 @@ function MainCard({ song, spotify }) {
           )}
         </div>
       </div>
-
       {why && (
         <p style={{ color: '#b07830', fontSize: 15, fontStyle: 'italic', lineHeight: 1.5, borderTop: '1px solid rgba(232,168,56,0.1)', paddingTop: 14, marginTop: 16 }}>
           ✦ {why}
         </p>
       )}
-
-      {/* Spotify audio features */}
       {spotify?.features && (
         <div style={{ borderTop: '1px solid rgba(232,168,56,0.08)', paddingTop: 14, marginTop: 14 }}>
           <p style={{ fontSize: 10, color: C.dim, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 10 }}>Spotify Audio Features</p>
@@ -137,12 +120,9 @@ function MainCard({ song, spotify }) {
           <FeatureBar label="Энергия" value={spotify.features.energy} />
           <FeatureBar label="Акустичность" value={spotify.features.acousticness} />
           <FeatureBar label="Танцевальность" value={spotify.features.danceability} />
-          {spotify.features.tempo && (
-            <p style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>🎵 {spotify.features.tempo} BPM</p>
-          )}
+          {spotify.features.tempo && <p style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>🎵 {spotify.features.tempo} BPM</p>}
         </div>
       )}
-
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: 16, borderTop: '1px solid rgba(232,168,56,0.08)', paddingTop: 16 }}>
         {spotify?.track?.preview_url && <PreviewButton url={spotify.track.preview_url} />}
         <ExtLink href={ugUrl(title, artist)} accent>🎸 UG Tabs</ExtLink>
@@ -154,8 +134,6 @@ function MainCard({ song, spotify }) {
   );
 }
 
-// ── Next track card ──────────────────────────────────────────────────────────
-
 function NextCard({ track, onPick }) {
   const [open, setOpen] = useState(false);
   const name   = track.name;
@@ -163,7 +141,6 @@ function NextCard({ track, onPick }) {
   const imgs   = track.image || [];
   const imgUrl = imgs.find(i => i.size === 'medium' || i.size === 'large')?.['#text'];
   const img    = imgUrl && !imgUrl.includes('2a96cbd8b46e442fc41c2b86b821562f') ? imgUrl : null;
-
   return (
     <div style={{ background: 'rgba(232,168,56,0.03)', border: '1px solid rgba(232,168,56,0.11)', borderRadius: 14, overflow: 'hidden' }}>
       <button onClick={() => setOpen(o => !o)} style={{
@@ -181,7 +158,6 @@ function NextCard({ track, onPick }) {
         </div>
         <span style={{ color: C.amber, fontSize: 18, flexShrink: 0, transition: 'transform .2s', transform: open ? 'rotate(90deg)' : 'none' }}>→</span>
       </button>
-
       {open && (
         <div style={{ borderTop: '1px solid rgba(232,168,56,0.08)', padding: '11px 16px 13px', display: 'flex', flexWrap: 'wrap', gap: 7 }}>
           <ExtLink href={ugUrl(name, artist)} accent>🎸 UG Tabs</ExtLink>
@@ -199,30 +175,25 @@ function NextCard({ track, onPick }) {
   );
 }
 
-// ── Main page ────────────────────────────────────────────────────────────────
-
 export default function Home() {
-  const [mood, setMood]         = useState(null);
-  const [energy, setEnergy]     = useState(55);
-  const [wish, setWish]         = useState('');
-  const [mainSong, setMainSong] = useState(null);
-  const [spotify, setSpotify]   = useState(null);
+  const [mood, setMood]             = useState(null);
+  const [energy, setEnergy]         = useState(55);
+  const [wish, setWish]             = useState('');
+  const [mainSong, setMainSong]     = useState(null);
+  const [spotify, setSpotify]       = useState(null);
   const [nextTracks, setNextTracks] = useState([]);
-  const [history, setHistory]   = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [loadStep, setLoadStep] = useState('');
-  const [error, setError]       = useState(null);
+  const [history, setHistory]       = useState([]);
+  const [loading, setLoading]       = useState(false);
+  const [loadStep, setLoadStep]     = useState('');
+  const [error, setError]           = useState(null);
 
   const energyLabel =
     energy < 25 ? '🌙 Тихо' : energy < 50 ? '🕯️ Спокойно' :
     energy < 75 ? '🔥 Разогреваемся' : '⚡ Полный угар';
 
   const recommend = useCallback(async (selectedMood, nrg, prevSong = null) => {
-    setLoading(true); setMainSong(null); setSpotify(null);
-    setNextTracks([]); setError(null);
-
+    setLoading(true); setMainSong(null); setSpotify(null); setNextTracks([]); setError(null);
     try {
-      // Step 1: Claude picks seed song
       setLoadStep('Claude подбирает песню…');
       const recRes = await fetch('/api/recommend', {
         method: 'POST',
@@ -233,28 +204,24 @@ export default function Home() {
       if (song.error) throw new Error(song.error);
       setMainSong(song);
 
-      // Step 2: Last.fm similar tracks (parallel with Spotify)
       setLoadStep('Last.fm подбирает следующие…');
       const [lfmRes, spotifyRes] = await Promise.all([
         fetch(`/api/lastfm?artist=${encodeURIComponent(song.artist)}&track=${encodeURIComponent(song.title)}`),
         fetch(`/api/spotify?title=${encodeURIComponent(song.title)}&artist=${encodeURIComponent(song.artist)}`),
       ]);
 
-      // Last.fm tracks
       const lfmData = await lfmRes.json();
       let tracks = [];
       if (lfmData.similartracks?.track) {
         const t = lfmData.similartracks.track;
         tracks = Array.isArray(t) ? t : [t];
       }
-      // Fallback: tag-based
       if (tracks.length < 3) {
         const tagRes = await fetch(`/api/lastfm?tag=${encodeURIComponent(song.tag || 'acoustic')}`);
         const tagData = await tagRes.json();
         const tagTracks = tagData.tracks?.track || [];
         tracks = [...tracks, ...(Array.isArray(tagTracks) ? tagTracks : [tagTracks])];
       }
-      // Dedupe
       const seen = new Set([song.title.toLowerCase()]);
       const histSet = new Set(history.map(h => h.toLowerCase()));
       const clean = tracks.filter(t => {
@@ -264,27 +231,47 @@ export default function Home() {
       });
       setNextTracks(clean.slice(0, 3));
 
-      // Spotify data
       const spotifyData = await spotifyRes.json();
       if (spotifyData.available && spotifyData.track) setSpotify(spotifyData);
-
       if (prevSong) setHistory(h => [...h.slice(-7), prevSong.title]);
-
     } catch (e) {
       setError(e.message);
     } finally {
       setLoading(false); setLoadStep('');
     }
-  }, [history]);
+  }, [history, wish]);
 
   const handleMood    = m => { setMood(m); recommend(m, energy); };
   const handleWishKey = e => { if (e.key === 'Enter' && mood) recommend(mood, energy); };
-  const handlePick    = t => {
-    const picked = { title: t.name, artist: typeof t.artist === 'string' ? t.artist : t.artist?.name };
-    recommend(mood, energy, mainSong);
-  };
+  const handlePick    = t => { recommend(mood, energy, mainSong); };
   const handleShuffle = () => recommend(mood, energy, mainSong);
   const handleBack    = () => { setMainSong(null); setMood(null); setNextTracks([]); };
+
+  const WishInput = ({ placeholder, onEnter }) => (
+    <div style={{ position: 'relative' }}>
+      <input
+        type="text"
+        value={wish}
+        onChange={e => setWish(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && onEnter()}
+        placeholder={placeholder}
+        style={{
+          width: '100%', background: 'rgba(232,168,56,.04)',
+          border: '1px solid rgba(232,168,56,.18)', borderRadius: 10,
+          padding: '11px 36px 11px 14px', color: C.text, fontFamily: 'inherit',
+          fontSize: 15, outline: 'none',
+        }}
+        onFocus={e => e.target.style.borderColor = 'rgba(232,168,56,.45)'}
+        onBlur={e => e.target.style.borderColor = 'rgba(232,168,56,.18)'}
+      />
+      {wish && (
+        <button onClick={() => setWish('')} style={{
+          position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+          background: 'none', border: 'none', color: C.dim, cursor: 'pointer', fontSize: 16,
+        }}>✕</button>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -303,6 +290,7 @@ export default function Home() {
         ::-webkit-scrollbar-thumb { background: rgba(232,168,56,.25); border-radius: 2px; }
         input[type=range] { -webkit-appearance: none; height: 3px; border-radius: 2px; outline: none; cursor: pointer; }
         input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #e8a838; box-shadow: 0 0 8px rgba(232,168,56,.5); cursor: pointer; }
+        input[type=text]::placeholder { color: #5a3a10; opacity: 1; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
         .mood-btn { transition: all .2s !important; }
@@ -315,7 +303,6 @@ export default function Home() {
 
         <div style={{ maxWidth: 640, margin: '0 auto', padding: '36px 20px 70px', position: 'relative' }}>
 
-          {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 36 }}>
             <div style={{ fontSize: 38, marginBottom: 10 }}>🎸</div>
             <h1 style={{ fontSize: 46, fontWeight: 600, letterSpacing: '-.02em', background: 'linear-gradient(140deg,#f5ead6 30%,#e8a838)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -324,7 +311,6 @@ export default function Home() {
             <p style={{ color: C.dim, fontSize: 15, marginTop: 7, fontStyle: 'italic' }}>умный сетлист для гитариста</p>
           </div>
 
-          {/* Mood selection */}
           {!mainSong && !loading && (
             <div className="fade">
               <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.dim, marginBottom: 14 }}>
@@ -344,7 +330,7 @@ export default function Home() {
                 ))}
               </div>
 
-              <div style={{ background: 'rgba(232,168,56,.04)', border: '1px solid rgba(232,168,56,.12)', borderRadius: 12, padding: '18px 22px' }}>
+              <div style={{ background: 'rgba(232,168,56,.04)', border: '1px solid rgba(232,168,56,.12)', borderRadius: 12, padding: '18px 22px', marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 13 }}>
                   <span style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.dim }}>Энергия</span>
                   <span style={{ fontSize: 15, color: C.amber, fontStyle: 'italic' }}>{energyLabel}</span>
@@ -354,38 +340,16 @@ export default function Home() {
                   style={{ width: '100%', background: `linear-gradient(to right,${C.amber} ${energy}%,rgba(232,168,56,.18) ${energy}%)` }} />
               </div>
 
-              <div style={{ marginTop: 12 }}>
-                <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.dim, marginBottom: 10 }}>
-                  Пожелание — необязательно
-                </p>
-                <div style={{ position: 'relative' }}>
-                  <input
-                    type="text"
-                    value={wish}
-                    onChange={e => setWish(e.target.value)}
-                    onKeyDown={handleWishKey}
-                    placeholder='например: "что-нибудь из Цоя" или "хочу Меладзе"'
-                    style={{
-                      width: '100%', background: 'rgba(232,168,56,.04)',
-                      border: '1px solid rgba(232,168,56,.18)', borderRadius: 10,
-                      padding: '12px 16px', color: C.text, fontFamily: 'inherit',
-                      fontSize: 15, outline: 'none',
-                    }}
-                    onFocus={e => e.target.style.borderColor = 'rgba(232,168,56,.45)'}
-                    onBlur={e => e.target.style.borderColor = 'rgba(232,168,56,.18)'}
-                  />
-                  {wish && (
-                    <button onClick={() => setWish('')} style={{
-                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                      background: 'none', border: 'none', color: C.dim, cursor: 'pointer', fontSize: 16,
-                    }}>✕</button>
-                  )}
-                </div>
-              </div>
+              <p style={{ fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: C.dim, marginBottom: 10 }}>
+                Пожелание — необязательно
+              </p>
+              <WishInput
+                placeholder='например: "что-нибудь из Цоя" или "хочу Меладзе"'
+                onEnter={() => mood && recommend(mood, energy)}
+              />
             </div>
           )}
 
-          {/* Loading */}
           {loading && (
             <div className="fade" style={{ textAlign: 'center', padding: '80px 0' }}>
               <div style={{ fontSize: 50, animation: 'pulse 1.2s ease-in-out infinite' }}>🎸</div>
@@ -393,7 +357,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Error */}
           {error && !loading && (
             <div className="fade" style={{ textAlign: 'center', padding: '40px 0' }}>
               <p style={{ color: '#c06030', marginBottom: 14 }}>{error}</p>
@@ -403,33 +366,15 @@ export default function Home() {
             </div>
           )}
 
-          {/* Results */}
           {mainSong && !loading && (
             <div className="fade">
               <MainCard song={mainSong} spotify={spotify} />
 
-              <div style={{ margin: '14px 0 10px', position: 'relative' }}>
-                <input
-                  type="text"
-                  value={wish}
-                  onChange={e => setWish(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleShuffle()}
+              <div style={{ margin: '14px 0 10px' }}>
+                <WishInput
                   placeholder='уточни пожелание: "хочу Цоя" или "что-то потише"'
-                  style={{
-                    width: '100%', background: 'rgba(232,168,56,.04)',
-                    border: '1px solid rgba(232,168,56,.18)', borderRadius: 10,
-                    padding: '11px 36px 11px 14px', color: C.text, fontFamily: 'inherit',
-                    fontSize: 15, outline: 'none',
-                  }}
-                  onFocus={e => e.target.style.borderColor = 'rgba(232,168,56,.45)'}
-                  onBlur={e => e.target.style.borderColor = 'rgba(232,168,56,.18)'}
+                  onEnter={handleShuffle}
                 />
-                {wish && (
-                  <button onClick={() => setWish('')} style={{
-                    position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                    background: 'none', border: 'none', color: C.dim, cursor: 'pointer', fontSize: 16,
-                  }}>✕</button>
-                )}
               </div>
 
               <div style={{ display: 'flex', gap: 10, margin: '0 0 22px' }}>
